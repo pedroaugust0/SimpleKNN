@@ -10,9 +10,9 @@ import java.util.List;
  * Created by Pedro Augusto Di Francia Rosso on 06/04/17.
  *
  * Uma simples implementação do classificador K - Nearest Neighbor (K-NN) em Java.
+ * Utiliza classificação binária. (GrupoA = 0, GrupoB = 1)
  *
  */
-
 public class simpleKNN {
 
     /* Número de vizinhos */
@@ -31,7 +31,8 @@ public class simpleKNN {
      * OBS.: a quantidade de elementos em uma linha que inicia com training DEVE SER igual
      *          ao definido em trainingDimension + 1 (incluindo o training)
      *      a quantidade de linhas iniciadas com training DEVE SER igual ao definido em trainingSamples
-     *      a quantidade de elementos na linha group DEVE SER igual ao definido em trainingSamples + 1
+     *      a quantidade de elementos do group DEVE SER igual ao definido em trainingSamples + 1
+     *          (inclui 1 group) o qual diz que os dados é correspondente ao grupo
      *      apenas 1 linha começará com sample e DEVE TER a mesma quantidade de elementos definido em
      *          trainingDimension + 1 (incluindo o sample)
      */
@@ -43,8 +44,8 @@ public class simpleKNN {
         training = null;
         group = null;
         sample = null;
-
         BufferedReader defaults = null;
+
         try {
              defaults = new BufferedReader(new FileReader("./defaults.csv"));
         } catch (FileNotFoundException e) {
@@ -52,8 +53,9 @@ public class simpleKNN {
         }
 
         String line;
-
         int iTraining = 0;
+        int iGroup = 0;
+
         try {
             while ((line = defaults.readLine()) != null) {
                 // "," ou ";" de acordo com o arquivo
@@ -72,12 +74,14 @@ public class simpleKNN {
                     for (int i = 0; i < (row.length - 1); i++){
                         training[iTraining][i] = Double.parseDouble(row[i+1]);
                     }
+
                     iTraining++;
                 }
 
                 if(line.startsWith("group")){
                     for(int i = 0; i < (row.length -1); i++){
-                        group[i] = Integer.parseInt(row[i+1]);
+                        group[iGroup] = Integer.parseInt(row[i+1]);
+                        iGroup++;
                     }
                 }
 
@@ -86,7 +90,6 @@ public class simpleKNN {
                         sample[i] = Double.parseDouble(row[i+1]);
                     }
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -101,6 +104,7 @@ public class simpleKNN {
      * @return distance -- Retorna a distância euclidiana entre os dois pontos.
      */
     private static double euclidean(double[] sample, int iTraining){
+
         double distance = 0.0;
         int length = sample.length;
 
@@ -118,8 +122,10 @@ public class simpleKNN {
      * @return sampleGroup
      */
     private static int getSampleGroup(double[] sample){
+        int tipoGrupoA = 0, tipoGrupoB = 1;
         int sampleGroup = 0, groupA = 0, groupB = 0;
         int matLength = training.length;
+
         SampleDistances sampleDistance;
         List<SampleDistances> distances = new ArrayList<>();
 
@@ -130,24 +136,25 @@ public class simpleKNN {
 
         Collections.sort(distances);
 
-
-
         for (int k = 0; k < K; k++){
             int groupDistance = distances.get(k).getGroup();
-            if( groupDistance == 1){
+
+            if( groupDistance == tipoGrupoA){
                 groupA++;
-            } else if (groupDistance == 2){
+            } else if (groupDistance == tipoGrupoB){
                 groupB++;
             } else {
                 System.err.println("ERRO!");
             }
 
             if(groupA > groupB){
-                sampleGroup = 1;
+                sampleGroup = tipoGrupoA;
             } else {
-                sampleGroup = 2;
+                sampleGroup = tipoGrupoB;
             }
+
         }
+
 
         /*Show SampleDistances in Order*/
 //        for (int j = 0; j < matLength; j++) {
@@ -159,16 +166,16 @@ public class simpleKNN {
     }
 
 
-
-
-
+    /**
+     * Função principal, busca os dados padrões e apresenta a classe para a entrada sample do csv
+     * @param args -- necessário da implementação java
+     */
     public static void main(String[] args) {
 
         loadDefaults();
         System.out.println("Sample Group: " + getSampleGroup(sample));
 
     }
-
 
 }
 
@@ -196,7 +203,7 @@ class SampleDistances implements Comparable<SampleDistances>{
 
     /**
      * Retorna o grupo da Amostra de treinamento específica
-     * @return group -- grupo da amostra de treinamento específcica
+     * @return group -- grupo da amostra de treinamento específica
      */
     int getGroup(){
         return this.group;
@@ -204,17 +211,20 @@ class SampleDistances implements Comparable<SampleDistances>{
 
     /**
      * Função que gera a classificação baseada na comparação das distâncias
-     * @param otherDistance
+     * @param otherDistance -- distância que será comparada
      * @return -1 -- se for menor; 1 -- se for maior; 0 -- se for igual
      */
     public int compareTo(SampleDistances otherDistance) {
+
         if (this.distance < otherDistance.distance) {
             return -1;
         }
+
         if (this.distance > otherDistance.distance) {
             return 1;
         }
+
         return 0;
     }
-}
 
+}
