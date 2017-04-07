@@ -1,3 +1,7 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,13 +15,83 @@ import java.util.List;
 
 public class simpleKNN {
 
-    private static int K = 3;
-    private static int[] group = {1, 1, 1, 1, 1, 2, 2, 2, 2, 2};
+    /* Número de vizinhos */
+    private static int K;
 
-    private static double[][] training = {{175,80}, {193.5,110}, {183,92.8}, {160,60},
-            {177,73.1}, {175,80}, {150,55}, {159,63.2}, {180,70}, {163,110}};
+    /* Matriz de treinamento */
+    private static double[][] training;
+    /* Grupo para cada amostra da matriz de treinamento */
+    private static int[] group;
 
-    private static double[] sample = {130, 40};
+    /* Sample que será analisada */
+    private static double[] sample;
+
+    /**
+     * Função que carrega os valores padrões para teste de um arquivo CSV (defaults.csv).
+     * OBS.: a quantidade de elementos em uma linha que inicia com training DEVE SER igual
+     *          ao definido em trainingDimension + 1 (incluindo o training)
+     *      a quantidade de linhas iniciadas com training DEVE SER igual ao definido em trainingSamples
+     *      a quantidade de elementos na linha group DEVE SER igual ao definido em trainingSamples + 1
+     *      apenas 1 linha começará com sample e DEVE TER a mesma quantidade de elementos definido em
+     *          trainingDimension + 1 (incluindo o sample)
+     */
+    private static void loadDefaults(){
+        int trainingSamples;
+        int trainingDimension;
+
+        K = 0;
+        training = null;
+        group = null;
+        sample = null;
+
+        BufferedReader defaults = null;
+        try {
+             defaults = new BufferedReader(new FileReader("./defaults.csv"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        String line;
+
+        int iTraining = 0;
+        try {
+            while ((line = defaults.readLine()) != null) {
+                // "," ou ";" de acordo com o arquivo
+                String[] row = line.split(";");
+
+                if(line.startsWith("k")){
+                    K = Integer.parseInt(row[1]);
+                    trainingSamples = Integer.parseInt(row[3]);
+                    trainingDimension = Integer.parseInt(row[5]);
+                    training = new double[trainingSamples][trainingDimension];
+                    group = new int[trainingSamples];
+                    sample = new double[trainingDimension];
+                }
+
+                if(line.startsWith("training")){
+                    for (int i = 0; i < (row.length - 1); i++){
+                        training[iTraining][i] = Double.parseDouble(row[i+1]);
+                    }
+                    iTraining++;
+                }
+
+                if(line.startsWith("group")){
+                    for(int i = 0; i < (row.length -1); i++){
+                        group[i] = Integer.parseInt(row[i+1]);
+                    }
+                }
+
+                if(line.startsWith("sample")){
+                    for (int i = 0; i < (row.length - 1); i++){
+                        sample[i] = Double.parseDouble(row[i+1]);
+                    }
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Função que calcula a distância (euclidiana) entre as dimensões da sample e de um item da
@@ -43,7 +117,7 @@ public class simpleKNN {
      * @param sample - vetor da amostra
      * @return sampleGroup
      */
-    public static int getSampleGroup(double[] sample){
+    private static int getSampleGroup(double[] sample){
         int sampleGroup = 0, groupA = 0, groupB = 0;
         int matLength = training.length;
         SampleDistances sampleDistance;
@@ -56,10 +130,7 @@ public class simpleKNN {
 
         Collections.sort(distances);
 
-//        for (int j = 0; j < matLength; j++){
-//            System.out.println("Classe: " + distances.get(j).getGroup());
-//            System.out.println("Distância: " + distances.get(j).getDistance());
-//        }
+
 
         for (int k = 0; k < K; k++){
             int groupDistance = distances.get(k).getGroup();
@@ -78,14 +149,23 @@ public class simpleKNN {
             }
         }
 
+        /*Show SampleDistances in Order*/
+//        for (int j = 0; j < matLength; j++) {
+//            System.out.println("iTraining[" + j + "] - Group: " + distances.get(j).getGroup());
+//            System.out.println("iTraining[" + j + "] - Distância: " + distances.get(j).getDistance());
+//        }
+
         return sampleGroup;
     }
 
 
 
+
+
     public static void main(String[] args) {
 
-        System.out.println(getSampleGroup(sample));
+        loadDefaults();
+        System.out.println("Sample Group: " + getSampleGroup(sample));
 
     }
 
