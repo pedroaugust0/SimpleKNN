@@ -13,7 +13,7 @@ import java.util.List;
  * Utiliza classificação binária. (GrupoA = 0, GrupoB = 1)
  *
  */
-public class simpleKNN {
+public class SimpleKNN {
 
     /* Número de vizinhos */
     private static int K;
