@@ -26,6 +26,8 @@ public class SimpleKNN {
     /* Sample que será analisada */
     private static double[] sample;
 
+    /*Valores dos Grupos (Padrão é 0 e 1) mas pode ser modificado através do arquivo .CSV*/
+    private static int tipoGrupoA = 0, tipoGrupoB = 1;
     /**
      * Função que carrega os valores padrões para teste de um arquivo CSV (defaults.csv).
      * OBS.: a quantidade de elementos em uma linha que inicia com training DEVE SER igual
@@ -79,8 +81,12 @@ public class SimpleKNN {
                 }
 
                 if(line.startsWith("group")){
+                    tipoGrupoA = Integer.parseInt(row[1]);
                     for(int i = 0; i < (row.length -1); i++){
                         group[iGroup] = Integer.parseInt(row[i+1]);
+                        if(group[iGroup] != tipoGrupoA){
+                            tipoGrupoB = group[iGroup];
+                        }
                         iGroup++;
                     }
                 }
@@ -122,7 +128,7 @@ public class SimpleKNN {
      * @return sampleGroup
      */
     private static int getSampleGroup(double[] sample){
-        int tipoGrupoA = 0, tipoGrupoB = 1;
+
         int sampleGroup = 0, groupA = 0, groupB = 0;
         int matLength = training.length;
 
