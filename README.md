@@ -1,4 +1,4 @@
-# simpleKNN (PT-BR)
+# SimpleKNN (PT-BR)
 
 Uma simples implementação do classificador K - Nearest Neighbor (K-NN) em Java.
 Utilizando matrizes e vetores para serem a amostra (sample) e o treinamento (training).
